@@ -1,0 +1,39 @@
+!!!5
+%head
+  %title Orbits 3D - HTML5 Gravity Simulator 
+  %link{"rel" => "stylesheet", "href" => "style.css", "type" => "text/css"}
+  %link{"rel" => "stylesheet", "href" => "jquery-ui-custom.css", "type" => "text/css"}
+
+  %script{"src" => "https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js", "type" => "text/javascript"}
+  %script{"src" => "jquery-ui-custom.js", "type" => "text/javascript"}
+  %script{"src" => "three.min.js", "type" => "text/javascript"}
+  %script{"src" => "renderer.js", "type" => "text/javascript"}
+  %script{"src" => "sim.js", "type" => "text/javascript"}
+  %script{"src" => "app.js", "type" => "text/javascript"}
+%body
+  #ui
+    #options
+      %h2 Options
+
+      #controls
+        .slider-box.option#simulationSpeed
+          .slider
+          .value
+          %label Simulation speed
+      #buttons.btn-group
+        .btn#play.active <img src='img/play.png'/> 
+        .btn#pause <img src='img/pause.png'/>
+        .btn#stop <img src='img/stop.png'/>
+    #info
+      #about
+        :markdown
+          ## Orbits 3D
+          <p class='center'>Gravity simulator</p>
+    #overhead
+      #options-button <img src='img/options.png'/>
+      %header
+        %h1 Orbits
+        %p#desc HTML5 Gravity Simulator 
+        %p#instruction Click for more info
+
+  #sim
