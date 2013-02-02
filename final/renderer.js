@@ -12,22 +12,27 @@
         near: 0.1,
         far: 10000,
         mouse_x: 0,
-        mouse_y: 0
+        mouse_y: 0,
+        clicked: false
       };
       $container = $(this.el);
       this.renderer = new THREE.WebGLRenderer();
-      this.camera = new THREE.PerspectiveCamera(this.options['view_angle'], this.options['width'] / this.options['height'], this.options['near'], this.options['far']);
       this.scene = new THREE.Scene();
-      this.scene.add(this.camera);
+      this.camera = new THREE.PerspectiveCamera(this.options['view_angle'], this.options['width'] / this.options['height'], this.options['near'], this.options['far']);
       this.camera.position.z = 300;
+      this.scene.add(this.camera);
       this.renderer.setSize(this.options['width'], this.options['height']);
       $container.append(this.renderer.domElement);
-      sphereMaterial = new THREE.MeshLambertMaterial({
-        color: 0xCC0000
+      sphereMaterial = new THREE.MeshBasicMaterial({
+        map: THREE.ImageUtils.loadTexture('land_ocean_ice_cloud_2048.jpg'),
+        overdraw: true
       });
-      this.planet = new THREE.Mesh(new THREE.SphereGeometry(50, 16, 16), sphereMaterial);
+      this.planet = new THREE.Mesh(new THREE.SphereGeometry(100, 64, 64), sphereMaterial);
+      this.planet.radius = 6378;
       this.scene.add(this.planet);
-      this.orbiter = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), new THREE.MeshNormalMaterial());
+      this.orbiter = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshLambertMaterial({
+        color: 0xCC0000
+      }));
       this.scene.add(this.orbiter);
       light = new THREE.PointLight(0xFFFFFF);
       light.position.x = 10;
@@ -37,18 +42,19 @@
       console.log("Renderer initialized!");
     }
 
-    Renderer3D.prototype.render = function() {
-      var geo;
-      this.camera.position.x += (this.options.mouse_x - this.camera.position.x) * 0.05;
-      this.camera.position.y += (this.options.mouse_y - this.camera.position.y) * 0.05;
+    Renderer3D.prototype.render = function(delta) {
+      if (this.options.clicked) {
+        this.camera.position.x += (this.options.mouse_x - this.camera.position.x) * 0.05;
+      }
+      if (this.options.clicked) {
+        this.camera.position.y += (this.options.mouse_y - this.camera.position.y) * 0.05;
+      }
       this.camera.lookAt(this.scene.position);
-      geo = new THREE.Geometry();
-      geo.vertices.push(this.planet.position);
-      geo.vertices.push(this.orbiter.position);
-      this.scene.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
-        color: 0x0000ff
-      })));
       return this.renderer.render(this.scene, this.camera);
+    };
+
+    Renderer3D.prototype.render_ellipsis = function(a, b) {
+      return console.log("" + a + ", " + b);
     };
 
     Renderer3D.prototype.handleResize = function() {

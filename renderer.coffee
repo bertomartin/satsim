@@ -10,35 +10,37 @@ class @Renderer3D
       far: 10000
       mouse_x: 0
       mouse_y: 0
+      clicked: false
 
     $container = $(@el)
 
     @renderer = new THREE.WebGLRenderer()
+    @scene = new THREE.Scene()
+
     @camera = new THREE.PerspectiveCamera(
       @options['view_angle'],
       @options['width']/@options['height'],
       @options['near'],
       @options['far']
     )
-
-    @scene = new THREE.Scene()
-
-    @scene.add @camera
     @camera.position.z = 300
+    @scene.add @camera
+    
     @renderer.setSize(@options['width'], @options['height'])
 
     $container.append(@renderer.domElement)
 
-    sphereMaterial = new THREE.MeshLambertMaterial( { color: 0xCC0000 })
+    sphereMaterial = new THREE.MeshBasicMaterial( { map: THREE.ImageUtils.loadTexture( 'land_ocean_ice_cloud_2048.jpg' ), overdraw: true } )
     @planet = new THREE.Mesh(
-      new THREE.SphereGeometry(50, 16, 16),
+      new THREE.SphereGeometry(100, 64, 64),
       sphereMaterial
     )
+    @planet.radius = 6378 # km
     @scene.add @planet
 
     @orbiter = new THREE.Mesh(
-      new THREE.SphereGeometry(2, 16, 16),
-      new THREE.MeshNormalMaterial()
+      new THREE.SphereGeometry(0.5, 16, 16),
+      new THREE.MeshLambertMaterial({ color: 0xCC0000 })
     )
     @scene.add @orbiter
 
@@ -50,18 +52,15 @@ class @Renderer3D
     @scene.add light
     console.log "Renderer initialized!"
     
-  render: ->
-    @camera.position.x += ( @options.mouse_x - @camera.position.x) * 0.05
-    @camera.position.y += ( @options.mouse_y - @camera.position.y) * 0.05
+  render: (delta)->
+    @camera.position.x += ( @options.mouse_x - @camera.position.x) * 0.05 if @options.clicked
+    @camera.position.y += ( @options.mouse_y - @camera.position.y) * 0.05 if @options.clicked
     @camera.lookAt(@scene.position)
 
-    geo = new THREE.Geometry()
-    geo.vertices.push(@planet.position)
-    geo.vertices.push(@orbiter.position)
-
-    @scene.add new THREE.Line(geo, new THREE.LineBasicMaterial({color:0x0000ff}))
-
     @renderer.render(@scene, @camera)
+
+  render_ellipsis: (a, b) ->
+    console.log "#{a}, #{b}"
 
   handleResize: ->
     @options.width = window.innerWidth

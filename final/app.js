@@ -9,9 +9,16 @@
     $("#sim").mousemove(function(e) {
       return window.renderer.mouseMove(e);
     });
+    $("#sim").mousedown(function(e) {
+      window.renderer.set('clicked', true);
+      return window.renderer.mouseMove(e);
+    });
+    $("#sim").mouseup(function(e) {
+      window.renderer.set('clicked', false);
+      return window.renderer.mouseMove(e);
+    });
     window.simulation = new Simulator(window.renderer);
     window.simulation.start();
-    return;
     displayOnButtonClick("#options-button", "#options", "#info");
     displayOnButtonClick("header", "#info", "#options");
     $("header").hover(function() {
@@ -54,7 +61,7 @@
 
   initializeSliders = function() {
     var option, options, _i, _len, _results;
-    options = ["simulationSpeed"];
+    options = ["timeAcceleration"];
     _results = [];
     for (_i = 0, _len = options.length; _i < _len; _i++) {
       option = options[_i];
@@ -65,8 +72,8 @@
 
   sliderArguments = function(option, min, max, step) {
     var value;
-    if (min == null) min = 0;
-    if (max == null) max = 20;
+    if (min == null) min = 1;
+    if (max == null) max = 500;
     if (step == null) step = 1;
     value = window.simulation.get(option);
     setOption(option, value);

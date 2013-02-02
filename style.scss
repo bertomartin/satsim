@@ -65,6 +65,28 @@ header {
   z-index: 2;
 }
 
+#bottom {
+  position: fixed;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background: rgba(230, 230, 230, 0.7);
+  color: #424242;
+  border: 1px solid #000;
+  max-height: 300px;
+  overflow: scroll;
+
+  #flight_data {
+    width: 400px;
+    float: left;
+  }
+
+  #orbit_data {
+    width: 400px;
+    float: left;
+  }
+}
+
 canvas {
   position: absolute;
   width: 100%;

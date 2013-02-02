@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <head>
-  <title>Orbits 3D - HTML5 Gravity Simulator</title>
+  <title>Orbits 3D - HTML5 Satellite Simulator</title>
   <link href='style.css' rel='stylesheet' type='text/css' />
   <link href='jquery-ui-custom.css' rel='stylesheet' type='text/css' />
   <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js' type='text/javascript'></script>
   <script src='jquery-ui-custom.js' type='text/javascript'></script>
   <script src='three.min.js' type='text/javascript'></script>
+  <script src='FirstPersonControls.js' type='text/javascript'></script>
   <script src='renderer.js' type='text/javascript'></script>
   <script src='sim.js' type='text/javascript'></script>
   <script src='app.js' type='text/javascript'></script>
@@ -15,10 +16,10 @@
     <div id='options'>
       <h2>Options</h2>
       <div id='controls'>
-        <div class='slider-box option' id='simulationSpeed'>
+        <div class='slider-box option' id='timeAcceleration'>
           <div class='slider'></div>
           <div class='value'></div>
-          <label>Simulation speed</label>
+          <label>Time Acceleration</label>
         </div>
       </div>
       <div class='btn-group' id='buttons'>
@@ -30,16 +31,20 @@
     <div id='info'>
       <div id='about'>
         <h2 id='orbits_3d'>Orbits 3D</h2>
-        <p class='center'>Gravity simulator</p>
+        <p class='center'>Satellite simulator</p>
       </div>
     </div>
     <div id='overhead'>
       <div id='options-button'><img src='img/options.png'/></div>
       <header>
         <h1>Orbits</h1>
-        <p id='desc'>HTML5 Gravity Simulator</p>
+        <p id='desc'>HTML5 Satellite Simulator</p>
         <p id='instruction'>Click for more info</p>
       </header>
+    </div>
+    <div id='bottom'>
+      <div id='flight_data'></div>
+      <div id='orbit_data'></div>
     </div>
   </div>
   <div id='sim'></div>

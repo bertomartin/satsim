@@ -2,14 +2,12 @@ $(document).ready ->
   window.renderer = new Renderer3D("#sim")
   $(window).resize -> window.renderer.handleResize()
   $("#sim").mousemove (e) -> window.renderer.mouseMove(e)
-  
+  $("#sim").mousedown (e) -> window.renderer.set('clicked', true); window.renderer.mouseMove(e)
+  $("#sim").mouseup (e) -> window.renderer.set('clicked', false); window.renderer.mouseMove(e)
 
   window.simulation = new Simulator(window.renderer)
   window.simulation.start()
 
-
-  return 
-  
   displayOnButtonClick("#options-button", "#options", "#info")
   displayOnButtonClick("header", "#info", "#options")
 
@@ -48,11 +46,11 @@ setActiveButton = (btn) ->
   $("##{btn}").addClass("active")
 
 initializeSliders = ->
-  options = ["simulationSpeed"]
+  options = ["timeAcceleration"]
   for option in options
     $("##{option} > .slider").slider sliderArguments(option)
 
-sliderArguments = (option, min = 0, max = 20, step = 1) ->
+sliderArguments = (option, min = 1, max = 500, step = 1) ->
   value = window.simulation.get(option)
   setOption(option, value)
   value: value
