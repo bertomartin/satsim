@@ -49,8 +49,9 @@ initializeSliders = ->
   options = ["timeAcceleration"]
   for option in options
     $("##{option} > .slider").slider sliderArguments(option)
+  $("#initialSpeed > .slider").slider sliderArguments("initialSpeed", 0.1, 20, 0.1)
 
-sliderArguments = (option, min = 1, max = 500, step = 1) ->
+sliderArguments = (option, min = 1, max = 5000, step = 1) ->
   value = window.simulation.get(option)
   setOption(option, value)
   value: value

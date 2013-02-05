@@ -60,20 +60,19 @@
   };
 
   initializeSliders = function() {
-    var option, options, _i, _len, _results;
+    var option, options, _i, _len;
     options = ["timeAcceleration"];
-    _results = [];
     for (_i = 0, _len = options.length; _i < _len; _i++) {
       option = options[_i];
-      _results.push($("#" + option + " > .slider").slider(sliderArguments(option)));
+      $("#" + option + " > .slider").slider(sliderArguments(option));
     }
-    return _results;
+    return $("#initialSpeed > .slider").slider(sliderArguments("initialSpeed", 0.1, 20, 0.1));
   };
 
   sliderArguments = function(option, min, max, step) {
     var value;
     if (min == null) min = 1;
-    if (max == null) max = 500;
+    if (max == null) max = 5000;
     if (step == null) step = 1;
     value = window.simulation.get(option);
     setOption(option, value);

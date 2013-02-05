@@ -9,6 +9,7 @@
   %script{"src" => "three.min.js", "type" => "text/javascript"}
   %script{"src" => "FirstPersonControls.js", "type" => "text/javascript"}
   %script{"src" => "renderer.js", "type" => "text/javascript"}
+  %script{"src" => "orbit.js", "type" => "text/javascript"}
   %script{"src" => "sim.js", "type" => "text/javascript"}
   %script{"src" => "app.js", "type" => "text/javascript"}
 %body
@@ -21,6 +22,10 @@
           .slider
           .value
           %label Time Acceleration
+        .slider-box.option#initialSpeed
+          .slider
+          .value
+          %label Initial Speed
       #buttons.btn-group
         .btn#play.active <img src='img/play.png'/> 
         .btn#pause <img src='img/pause.png'/>

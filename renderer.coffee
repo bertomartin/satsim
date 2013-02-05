@@ -52,15 +52,25 @@ class @Renderer3D
     @scene.add light
     console.log "Renderer initialized!"
     
-  render: (delta)->
+  render: () ->
     @camera.position.x += ( @options.mouse_x - @camera.position.x) * 0.05 if @options.clicked
     @camera.position.y += ( @options.mouse_y - @camera.position.y) * 0.05 if @options.clicked
     @camera.lookAt(@scene.position)
 
     @renderer.render(@scene, @camera)
 
-  render_ellipsis: (a, b) ->
-    console.log "#{a}, #{b}"
+  addOrbit: (x, samples = 100) ->
+    orbit = jQuery.extend(true, {}, x) #Clone
+    interval = orbit.period()/samples
+
+    geometry = new THREE.Geometry()
+    material = new THREE.LineBasicMaterial({ color: 0xE01B32, opacity: 1.0})
+    for i in [1..samples+1]
+      orbit.step(interval)
+      pos = new THREE.Vector3(orbit.position().x/63.79, 0, orbit.position().y/63.79)
+      geometry.vertices.push(pos)
+    line = new THREE.Line(geometry, material)
+    @scene.add(line)
 
   handleResize: ->
     @options.width = window.innerWidth

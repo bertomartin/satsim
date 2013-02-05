@@ -42,7 +42,7 @@
       console.log("Renderer initialized!");
     }
 
-    Renderer3D.prototype.render = function(delta) {
+    Renderer3D.prototype.render = function() {
       if (this.options.clicked) {
         this.camera.position.x += (this.options.mouse_x - this.camera.position.x) * 0.05;
       }
@@ -53,8 +53,23 @@
       return this.renderer.render(this.scene, this.camera);
     };
 
-    Renderer3D.prototype.render_ellipsis = function(a, b) {
-      return console.log("" + a + ", " + b);
+    Renderer3D.prototype.addOrbit = function(x, samples) {
+      var geometry, i, interval, line, material, orbit, pos, _ref;
+      if (samples == null) samples = 100;
+      orbit = jQuery.extend(true, {}, x);
+      interval = orbit.period() / samples;
+      geometry = new THREE.Geometry();
+      material = new THREE.LineBasicMaterial({
+        color: 0xE01B32,
+        opacity: 1.0
+      });
+      for (i = 1, _ref = samples + 1; 1 <= _ref ? i <= _ref : i >= _ref; 1 <= _ref ? i++ : i--) {
+        orbit.step(interval);
+        pos = new THREE.Vector3(orbit.position().x / 63.79, 0, orbit.position().y / 63.79);
+        geometry.vertices.push(pos);
+      }
+      line = new THREE.Line(geometry, material);
+      return this.scene.add(line);
     };
 
     Renderer3D.prototype.handleResize = function() {
