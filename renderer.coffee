@@ -17,6 +17,7 @@ class @Renderer3D
     @renderer = new THREE.WebGLRenderer()
     @scene = new THREE.Scene()
 
+    @onboard_camera = false
     @camera = new THREE.PerspectiveCamera(
       @options['view_angle'],
       @options['width']/@options['height'],
@@ -35,14 +36,8 @@ class @Renderer3D
       new THREE.SphereGeometry(100, 64, 64),
       sphereMaterial
     )
-    @planet.radius = 6378 # km
+    @planet.radius = 6371 # km
     @scene.add @planet
-
-    @orbiter = new THREE.Mesh(
-      new THREE.SphereGeometry(0.5, 16, 16),
-      new THREE.MeshLambertMaterial({ color: 0xCC0000 })
-    )
-    @scene.add @orbiter
 
     light = new THREE.PointLight(0xFFFFFF)
     light.position.x = 10
@@ -51,15 +46,28 @@ class @Renderer3D
 
     @scene.add light
     console.log "Renderer initialized!"
+
+  createOrbiter: () ->
+    orbiter = new THREE.Mesh(
+      new THREE.SphereGeometry(2, 16, 16),
+      new THREE.MeshLambertMaterial({ color: 0xCC0000 })
+    )
+    @scene.add orbiter
+    orbiter
     
   render: () ->
-    @camera.position.x += ( @options.mouse_x - @camera.position.x) * 0.05 if @options.clicked
-    @camera.position.y += ( @options.mouse_y - @camera.position.y) * 0.05 if @options.clicked
-    @camera.lookAt(@scene.position)
+    if @onboard_camera
+      @camera.position = @orbiter.position
+      @camera.lookAt(@scene.position.clone().add(@orbiter.velocity.clone().multiplyScalar(20)))
+    else 
+      @camera.position.x += ( @options.mouse_x - @camera.position.x) * 0.05 if @options.clicked
+      @camera.position.z += ( @options.mouse_x - @camera.position.x) * 0.07 if @options.clicked
+      @camera.position.y += ( @options.mouse_y - @camera.position.y) * 0.05 if @options.clicked
+      @camera.lookAt(@scene.position)
 
     @renderer.render(@scene, @camera)
 
-  addOrbit: (x, samples = 100) ->
+  addOrbit: (x, samples = 10000) ->
     orbit = jQuery.extend(true, {}, x) #Clone
     interval = orbit.period()/samples
 
@@ -67,7 +75,7 @@ class @Renderer3D
     material = new THREE.LineBasicMaterial({ color: 0xE01B32, opacity: 1.0})
     for i in [1..samples+1]
       orbit.step(interval)
-      pos = new THREE.Vector3(orbit.position().x/63.79, 0, orbit.position().y/63.79)
+      pos = new THREE.Vector3(orbit.position().x/63.71, orbit.position().z/63.71, orbit.position().y/63.71)
       geometry.vertices.push(pos)
     line = new THREE.Line(geometry, material)
     @scene.add(line)
@@ -84,7 +92,7 @@ class @Renderer3D
   mouseMove: (e) ->
     @options.mouse_x = e.pageX - @options.width/2
     @options.mouse_y = e.pageY - @options.height/2
-    
+
   get: (option) -> @options[option]
   set: (option, value) -> @options[option] = value
 
