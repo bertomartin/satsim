@@ -10,6 +10,13 @@ $(document).ready ->
 
   displayOnButtonClick("#options-button", "#options", "#info")
   displayOnButtonClick("header", "#info", "#options")
+  $("#satellites-button").click ->
+    if $("#satellites").is(':visible')
+      $("#satellites").hide()
+      $("#satellites-button").css('right', '0')
+    else
+      $("#satellites").show()
+      $("#satellites-button").css('right', $("#satellites").outerWidth() + "px")
 
   $("header").hover( ->
       $("#instruction").slideDown(500)

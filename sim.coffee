@@ -51,6 +51,7 @@ class @Simulator
   addOrbiter: (orbit) ->
     orbiter = @renderer.createOrbiter()
     orbiter.orbit = orbit
+    orbiter.id = @orbiters.length + 1
     @orbiters.push orbiter
     @renderer.addOrbit(orbit)
 
@@ -73,16 +74,24 @@ class @Simulator
     html += "<tr><td>Apoapsis:</td><td>#{(orbit.apoapsis() - options.earth_radius).toFixed(1)} km</td></tr>"
     html += "<tr><td>Periapsis:</td><td>#{(orbit.periapsis() - options.earth_radius).toFixed(1)} km</td></tr>"
     html += "<tr><td>Inclination:</td><td>#{orbit.inclination().toFixed(1)} deg</td></tr>"
-    html += "<tr><td>Time to apoapsis:</td><td>#{format_time orbit.time_to_apoapsis()}</td></tr>"
-    html += "<tr><td>Time to periapsis:</td><td>#{format_time orbit.time_to_periapsis()}</td></tr>"
+    html += "<tr><td>Time to apoapsis:</td><td>#{format_time orbit.timeToApoapsis()}</td></tr>"
+    html += "<tr><td>Time to periapsis:</td><td>#{format_time orbit.timeToPeriapsis()}</td></tr>"
     html += "<tr><td>Mean Velocity:</td><td>#{orbit.meanVelocity().toFixed(1)} m/s</td></tr>"
-    html += "<tr><td>Longitude of the Ascending Node:</td><td>#{orbit.ascending_node_longitude().toFixed(1)} deg</td></tr>"
-    html += "<tr><td>Argument of periapsis:</td><td>#{orbit.argument_of_periapsis().toFixed(1)} deg</td></tr>"
+    html += "<tr><td>Longitude of the Ascending Node:</td><td>#{orbit.ascendingNodeLongitude().toFixed(1)} deg</td></tr>"
+    html += "<tr><td>Argument of periapsis:</td><td>#{orbit.argumentOfPeriapsis().toFixed(1)} deg</td></tr>"
     html += "<tr><td>True Anomaly:</td><td>#{orbit.trueAnomaly().toFixed(1)}</td></tr>"
     html += "<tr><td>Eccentric Anomaly:</td><td>#{orbit.eccentricAnomaly().toFixed(1)}</td></tr>"
     html += "<tr><td>Mean Anomaly:</td><td>#{orbit.meanAnomaly().toFixed(1)}</td></tr>"
     html += "</table>"
     $("#orbit_data").html(html)
+
+    html = ""
+    for orbiter in @orbiters
+      html += "<tr><td>#{orbiter.id}</td><td>#{orbiter.orbit.semiMajorAxis().toFixed(1)}</td><td>#{orbiter.orbit.eccentricity().toFixed(4)}</td><td>#{orbiter.orbit.inclination().toFixed(1)}</td></tr>"
+    $("#orbiters tbody").html(html)
+
+       
+
 
   update: (delta) ->
     for orbiter in @orbiters

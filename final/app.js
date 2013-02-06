@@ -21,6 +21,15 @@
     window.simulation.start();
     displayOnButtonClick("#options-button", "#options", "#info");
     displayOnButtonClick("header", "#info", "#options");
+    $("#satellites-button").click(function() {
+      if ($("#satellites").is(':visible')) {
+        $("#satellites").hide();
+        return $("#satellites-button").css('right', '0');
+      } else {
+        $("#satellites").show();
+        return $("#satellites-button").css('right', $("#satellites").outerWidth() + "px");
+      }
+    });
     $("header").hover(function() {
       return $("#instruction").slideDown(500);
     }, function() {

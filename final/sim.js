@@ -65,12 +65,13 @@
       var orbiter;
       orbiter = this.renderer.createOrbiter();
       orbiter.orbit = orbit;
+      orbiter.id = this.orbiters.length + 1;
       this.orbiters.push(orbiter);
       return this.renderer.addOrbit(orbit);
     };
 
     Simulator.prototype.update_data = function(orbit) {
-      var html;
+      var html, orbiter, _i, _len, _ref;
       html = "<h2>State data:</h2><table>";
       html += "<tr><td>Orbital Velocity:</td><td>" + ((orbit.velocity().length() * 1000).toFixed(1)) + " m/s</td></tr>";
       html += "<tr><td>Orbital Velocity (x):</td><td>" + ((orbit.velocity().x * 1000).toFixed(1)) + " m/s</td></tr>";
@@ -87,16 +88,23 @@
       html += "<tr><td>Apoapsis:</td><td>" + ((orbit.apoapsis() - options.earth_radius).toFixed(1)) + " km</td></tr>";
       html += "<tr><td>Periapsis:</td><td>" + ((orbit.periapsis() - options.earth_radius).toFixed(1)) + " km</td></tr>";
       html += "<tr><td>Inclination:</td><td>" + (orbit.inclination().toFixed(1)) + " deg</td></tr>";
-      html += "<tr><td>Time to apoapsis:</td><td>" + (format_time(orbit.time_to_apoapsis())) + "</td></tr>";
-      html += "<tr><td>Time to periapsis:</td><td>" + (format_time(orbit.time_to_periapsis())) + "</td></tr>";
+      html += "<tr><td>Time to apoapsis:</td><td>" + (format_time(orbit.timeToApoapsis())) + "</td></tr>";
+      html += "<tr><td>Time to periapsis:</td><td>" + (format_time(orbit.timeToPeriapsis())) + "</td></tr>";
       html += "<tr><td>Mean Velocity:</td><td>" + (orbit.meanVelocity().toFixed(1)) + " m/s</td></tr>";
-      html += "<tr><td>Longitude of the Ascending Node:</td><td>" + (orbit.ascending_node_longitude().toFixed(1)) + " deg</td></tr>";
-      html += "<tr><td>Argument of periapsis:</td><td>" + (orbit.argument_of_periapsis().toFixed(1)) + " deg</td></tr>";
+      html += "<tr><td>Longitude of the Ascending Node:</td><td>" + (orbit.ascendingNodeLongitude().toFixed(1)) + " deg</td></tr>";
+      html += "<tr><td>Argument of periapsis:</td><td>" + (orbit.argumentOfPeriapsis().toFixed(1)) + " deg</td></tr>";
       html += "<tr><td>True Anomaly:</td><td>" + (orbit.trueAnomaly().toFixed(1)) + "</td></tr>";
       html += "<tr><td>Eccentric Anomaly:</td><td>" + (orbit.eccentricAnomaly().toFixed(1)) + "</td></tr>";
       html += "<tr><td>Mean Anomaly:</td><td>" + (orbit.meanAnomaly().toFixed(1)) + "</td></tr>";
       html += "</table>";
-      return $("#orbit_data").html(html);
+      $("#orbit_data").html(html);
+      html = "";
+      _ref = this.orbiters;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        orbiter = _ref[_i];
+        html += "<tr><td>" + orbiter.id + "</td><td>" + (orbiter.orbit.semiMajorAxis().toFixed(1)) + "</td><td>" + (orbiter.orbit.eccentricity().toFixed(4)) + "</td><td>" + (orbiter.orbit.inclination().toFixed(1)) + "</td></tr>";
+      }
+      return $("#orbiters tbody").html(html);
     };
 
     Simulator.prototype.update = function(delta) {
