@@ -12,9 +12,12 @@ class @Renderer3D
     default_color: 0xCC0000
 
   # Public API
+  
+
   constructor: (el) ->
     @el = el
     @options = default_options
+    @testOrbitVisible = false
     $container = $(@el)
 
     @renderer = new THREE.WebGLRenderer()
@@ -75,13 +78,37 @@ class @Renderer3D
     interval = orbit.period()/samples
 
     geometry = new THREE.Geometry()
-    material = new THREE.LineBasicMaterial({ color: 0xE01B32, opacity: 1.0})
+    material = new THREE.LineBasicMaterial({ color: 0xE01B32, opacity: 1.0, linewidth: 2})
     for i in [1..samples+1]
       orbit.step(interval)
       pos = new THREE.Vector3(orbit.position().x/63.71, orbit.position().z/63.71, orbit.position().y/63.71)
       geometry.vertices.push(pos)
     line = new THREE.Line(geometry, material)
     @scene.add(line)
+
+  setTestOrbit: (x, samples = 1000) ->
+    orbit = jQuery.extend(true, {}, x) #Clone
+    interval = orbit.period()/samples
+
+    geometry = new THREE.Geometry()
+    material = new THREE.LineBasicMaterial({ color: 0xFCE235, opacity: 1.0, linewidth: 3})
+    for i in [1..samples+1]
+      orbit.step(interval)
+      pos = new THREE.Vector3(orbit.position().x/63.71, orbit.position().z/63.71, orbit.position().y/63.71)
+      geometry.vertices.push(pos)
+    @scene.remove(@testOrbit) if @testOrbit and @testOrbitVisible
+    @testOrbit = new THREE.Line(geometry, material)
+    @scene.add(@testOrbit) if @testOrbitVisible
+
+  showTestOrbit: ->
+    return if @testOrbitVisible
+    @testOrbitVisible = true
+    @scene.add(@testOrbit)
+
+  hideTestOrbit: ->
+    return unless @testOrbitVisible
+    @testOrbitVisislbe = false
+    @scene.remove(@testOrbit)
 
   select: (orbiter) -> orbiter.material.color.setHex(@options.selected_color)
   unselect: (orbiter) -> orbiter.material.color.setHex(@options.default_color)
@@ -103,4 +130,5 @@ class @Renderer3D
 
   getOrbiter: -> @orbiter
   getPlanet: -> @planet
+
 

@@ -1,5 +1,5 @@
 (function() {
-  var displayOnButtonClick, initializeClickEvents, initializeSliders, setActiveButton, setOption, sliderArguments, updateUI;
+  var displayOnButtonClick, error, getOrbitalElement, initializeClickEvents, initializeSliders, optionsSliderArguments, orbitSliderArguments, setActiveButton, setOption, updateTestOrbit, updateUI;
 
   $(document).ready(function() {
     window.renderer = new Renderer3D("#sim");
@@ -25,7 +25,8 @@
     $("#satellites-button").click(function() {
       if ($("#satellites").is(':visible')) {
         $("#satellites").hide();
-        return $("#satellites-button").css('right', '0');
+        $("#satellites-button").css('right', '0');
+        return window.renderer.hideTestOrbit();
       } else {
         $("#satellites").show();
         return $("#satellites-button").css('right', $("#satellites").outerWidth() + "px");
@@ -48,9 +49,27 @@
       window.simulation.stop();
       return setActiveButton("stop");
     });
+    initializeClickEvents();
+    window.testOrbit = new window.Orbit(window.simulation.get('gm')).fromOrbitalElements(8000, 0.001, 0 * Math.PI / 180, 0 * Math.PI / 180, 0 * Math.PI / 180);
+    window.renderer.setTestOrbit(window.testOrbit);
     initializeSliders();
-    return initializeClickEvents();
+    return $("#add-satellite").click(function() {
+      if (!(window.testOrbit.periapsis() <= window.simulation.get('earth_radius'))) {
+        window.simulation.addOrbiter(jQuery.extend(true, {}, window.testOrbit));
+        return window.renderer.hideTestOrbit();
+      } else {
+        return error("Periapsis is below sea level!");
+      }
+    });
   });
+
+  error = function(msg) {
+    $("#error").html(msg);
+    $("#error").slideDown(1000);
+    return setTimeout(function() {
+      return $("#error").slideUp(1000);
+    }, 5000);
+  };
 
   initializeClickEvents = function() {
     return $("tr.orbiter").click(function(e) {
@@ -88,39 +107,42 @@
   };
 
   window.updateData = function(orbiter) {
-    var html, orbit;
+    var dA, dE, dM, dN, dV, html, next, orbit;
     orbit = orbiter.orbit;
-    html = "<h2>State data:</h2><table>";
-    html += "<tr><td>Orbital Velocity:</td><td>" + ((orbit.velocity().length() * 1000).toFixed(1)) + " m/s</td></tr>";
-    html += "<tr><td>Orbital Velocity (x):</td><td>" + ((orbit.velocity().x * 1000).toFixed(1)) + " m/s</td></tr>";
-    html += "<tr><td>Orbital Velocity (y):</td><td>" + ((orbit.velocity().y * 1000).toFixed(1)) + " m/s</td></tr>";
-    html += "<tr><td>Orbital Velocity (z):</td><td>" + ((orbit.velocity().z * 1000).toFixed(1)) + " m/s</td></tr>";
-    html += "<tr><td>G * M:</td><td>" + orbit.gm + " km^3 s^-2</td></tr>";
-    html += "<tr><td>Altitude:</td><td>" + ((orbit.distance() - 6371).toFixed(1)) + " km</td></tr>";
-    html += "</table>";
-    $("#flight_data").html(html);
+    next = jQuery.extend(true, {}, orbit);
+    next.step(0.001);
+    dE = (next.eccentricAnomaly() - orbit.eccentricAnomaly()) * 10000;
+    dM = (next.meanAnomaly() - orbit.meanAnomaly()) * 10000;
+    dN = (next.trueAnomaly() - orbit.trueAnomaly()) * 10000;
+    dA = (next.distance() - orbit.distance()) * 10000;
+    dV = (next.velocity().length() - orbit.velocity().length()) * 10000;
     html = "<h2>Orbital elements:</h2><table>";
     html += "<tr><td>Semi Major Axis:</td><td>" + (orbit.semiMajorAxis().toFixed(1)) + " km</td></tr>";
     html += "<tr><td>Eccentricity:</td><td>" + (orbit.eccentricity().toFixed(4)) + "</td></tr>";
+    html += "<tr><td>Inclination:</td><td>" + (orbit.inclination().toFixed(1)) + " deg</td></tr>";
+    html += "<tr><td>Longitude of the Ascending Node:</td><td>" + (orbit.ascendingNodeLongitude().toFixed(1)) + " deg</td></tr>";
+    html += "<tr><td>Argument of periapsis:</td><td>" + (orbit.argumentOfPeriapsis().toFixed(1)) + " deg</td></tr>";
     html += "<tr><td>Period:</td><td>" + (formatTime(orbit.period())) + "</td></tr>";
     html += "<tr><td>Apoapsis:</td><td>" + ((orbit.apoapsis() - window.simulation.get('earth_radius')).toFixed(1)) + " km</td></tr>";
     html += "<tr><td>Periapsis:</td><td>" + ((orbit.periapsis() - window.simulation.get('earth_radius')).toFixed(1)) + " km</td></tr>";
-    html += "<tr><td>Inclination:</td><td>" + (orbit.inclination().toFixed(1)) + " deg</td></tr>";
+    html += "</table>";
+    $("#orbit_data").html(html);
+    html = "<h2>Current flight data:</h2><table>";
+    html += "<tr><td>Current Altitude:</td><td>" + ((orbit.distance() - 6371).toFixed(1)) + " km (" + (dA.toFixed(3)) + " d/dt)</td></tr>";
+    html += "<tr><td>Current Speed:</td><td>" + (orbit.velocity().length().toFixed(2)) + " km/s (" + (dV.toFixed(3)) + " d/dt)</td></tr>";
+    html += "<tr><td>True Anomaly:</td><td>" + (orbit.trueAnomaly().toFixed(1)) + " (" + (dN.toFixed(3)) + " d/dt)</td></tr>";
+    html += "<tr><td>Mean Anomaly:</td><td>" + (orbit.meanAnomaly().toFixed(1)) + " (" + (dM.toFixed(3)) + " d/dt)</td></tr>";
+    html += "<tr><td>Eccentric Anomaly:</td><td>" + (orbit.eccentricAnomaly().toFixed(1)) + " (" + (dE.toFixed(3)) + ")</td></tr>";
     html += "<tr><td>Time to apoapsis:</td><td>" + (formatTime(orbit.timeToApoapsis())) + "</td></tr>";
     html += "<tr><td>Time to periapsis:</td><td>" + (formatTime(orbit.timeToPeriapsis())) + "</td></tr>";
-    html += "<tr><td>Mean Velocity:</td><td>" + (orbit.meanVelocity().toFixed(1)) + " m/s</td></tr>";
-    html += "<tr><td>Longitude of the Ascending Node:</td><td>" + (orbit.ascendingNodeLongitude().toFixed(1)) + " deg</td></tr>";
-    html += "<tr><td>Argument of periapsis:</td><td>" + (orbit.argumentOfPeriapsis().toFixed(1)) + " deg</td></tr>";
-    html += "<tr><td>True Anomaly:</td><td>" + (orbit.trueAnomaly().toFixed(1)) + "</td></tr>";
-    html += "<tr><td>Eccentric Anomaly:</td><td>" + (orbit.eccentricAnomaly().toFixed(1)) + "</td></tr>";
-    html += "<tr><td>Mean Anomaly:</td><td>" + (orbit.meanAnomaly().toFixed(1)) + "</td></tr>";
     html += "</table>";
-    return $("#orbit_data").html(html);
+    return $("#flight_data").html(html);
   };
 
   updateUI = function(orbiters, selected_id, update_table) {
     if (update_table) window.updateTable(orbiters, selected_id);
-    return window.updateData(orbiters[selected_id]);
+    if (selected_id !== null) window.updateData(orbiters[selected_id]);
+    return initializeClickEvents();
   };
 
   displayOnButtonClick = function(button, div, hide) {
@@ -142,16 +164,28 @@
   };
 
   initializeSliders = function() {
-    var option, options, _i, _len;
+    var attr, name, option, options, orbital_elements, _i, _len, _results;
     options = ["timeAcceleration"];
     for (_i = 0, _len = options.length; _i < _len; _i++) {
       option = options[_i];
-      $("#" + option + " > .slider").slider(sliderArguments(option));
+      $("#" + option + " > .slider").slider(optionsSliderArguments(option));
     }
-    return $("#initialSpeed > .slider").slider(sliderArguments("initialSpeed", 0.1, 20, 0.1));
+    orbital_elements = {
+      semiMajorAxis: [1, 40000, 1, window.testOrbit.semiMajorAxis()],
+      eccentricity: [0, 0.9, 0.0001, window.testOrbit.eccentricity()],
+      inclination: [0, 360, 1, window.testOrbit.inclination()],
+      argumentOfPeriapsis: [0, 360, 1, window.testOrbit.argumentOfPeriapsis()],
+      longitudeOfTheAscendingNode: [0, 360, 1, window.testOrbit.ascendingNodeLongitude()]
+    };
+    _results = [];
+    for (name in orbital_elements) {
+      attr = orbital_elements[name];
+      _results.push($("#" + name + " > .slider").slider(orbitSliderArguments(name, attr[0], attr[1], attr[2], attr[3])));
+    }
+    return _results;
   };
 
-  sliderArguments = function(option, min, max, step) {
+  optionsSliderArguments = function(option, min, max, step) {
     var value;
     if (min == null) min = 1;
     if (max == null) max = 5000;
@@ -169,6 +203,23 @@
     };
   };
 
+  orbitSliderArguments = function(option, min, max, step, val) {
+    if (min == null) min = 1;
+    if (max == null) max = 5000;
+    if (step == null) step = 1;
+    if (val == null) val = 1;
+    $("#" + option + " > .value").html(val);
+    return {
+      value: val,
+      min: min,
+      max: max,
+      step: step,
+      slide: function(event, ui) {
+        return updateTestOrbit(option, ui.value);
+      }
+    };
+  };
+
   setOption = function(option, value) {
     window.simulation.set(option, value);
     $("#" + option + " > .value").html(value);
@@ -177,6 +228,28 @@
     } else {
       return $("#" + option + " > .value").removeClass('zero');
     }
+  };
+
+  getOrbitalElement = function(name) {
+    var v;
+    v = parseFloat($("#" + name + " > .value").html());
+    if ($.inArray(name, ["inclination", "longitudeOfTheAscendingNode", "argumentOfPeriapsis"]) >= 0) {
+      v *= Math.PI / 180;
+    }
+    return v;
+  };
+
+  updateTestOrbit = function(option, value) {
+    var a, e, i, o, omega;
+    window.renderer.showTestOrbit();
+    $("#" + option + " > .value").html(value);
+    a = getOrbitalElement("semiMajorAxis");
+    e = getOrbitalElement("eccentricity");
+    i = getOrbitalElement("inclination");
+    omega = getOrbitalElement("longitudeOfTheAscendingNode");
+    o = getOrbitalElement("argumentOfPeriapsis");
+    window.testOrbit.fromOrbitalElements(a, e, i, o, omega);
+    return window.renderer.setTestOrbit(window.testOrbit);
   };
 
 }).call(this);

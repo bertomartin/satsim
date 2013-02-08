@@ -7,7 +7,7 @@ class @Simulator
     thrust: false
     speed: 0.1
     gm: 398524.239 # * km^3 * s^-2
-    update_data_interval: 3
+    update_ui_interval: 10
     timeAcceleration: 100
     useKepler: true
     earth_radius: 6371
@@ -25,12 +25,9 @@ class @Simulator
     @planet = @renderer.getPlanet()
     @orbiters = []
     @last_ui_update = @options.update_ui_interval
+    @selected = null
 
-    @addOrbiter new window.Orbit(@options.gm).fromOrbitalElements(6780, 0.001, 51 * Math.PI/180, 0 * Math.PI/180, 110 * Math.PI/180)
-    @addOrbiter new window.Orbit(@options.gm).fromOrbitalElements(20000, 0.65, 20 * Math.PI/180, 0 * Math.PI/180, 60 * Math.PI/180)
-    @addOrbiter new window.Orbit(@options.gm).fromOrbitalElements(8000, 0.1, -20 * Math.PI/180, 0 * Math.PI/180, 40 * Math.PI/180)
-    @addOrbiter new window.Orbit(@options.gm).fromOrbitalElements(8000, 0.1, -180 * Math.PI/180, 0 * Math.PI/180, 170 * Math.PI/180)
-    @addOrbiter new window.Orbit(@options.gm).fromOrbitalElements(6500, 0, -90 * Math.PI/180, 0 * Math.PI/180, 30 * Math.PI/180)
+    @addOrbiter new window.Orbit(@options.gm).fromOrbitalElements(6780, 0.001, 45 * Math.PI/180, 0 * Math.PI/180, 270 * Math.PI/180)
     @selectOrbiter(0)
 
     @updateUI(true)
@@ -41,10 +38,11 @@ class @Simulator
     orbiter.id = @orbiters.length
     @orbiters.push orbiter
     @renderer.addOrbit(orbit)
+    @updateUI(true)
 
   selectOrbiter: (id, callback) ->
     return if id < 0 or id >= @orbiters.length
-    @renderer.unselect(@orbiters[@selected]) unless isNaN(@selected)
+    @renderer.unselect(@orbiters[@selected]) unless @selected == null
     @renderer.select(@orbiters[id])
     @selected = id 
     @updateUI(true)
@@ -59,9 +57,11 @@ class @Simulator
       orbiter.orbit.step(delta * 0.001 * @options.timeAcceleration)
       orbiter.position = new THREE.Vector3(orbiter.orbit.position().x, orbiter.orbit.position().z, orbiter.orbit.position().y).divideScalar(63.71)
       orbiter.velocity = new THREE.Vector3(orbiter.orbit.v.x, orbiter.orbit.v.z, orbiter.orbit.v.y)
-      @last_data_update -= 1
-      if @last_data_update <= 0
-        @updateUI(false)
+
+    @last_ui_update -= 1
+    if @last_ui_update <= 0
+      @updateUI(false)
+      @last_ui_update = @options.update_ui_interval
    
   run: =>
     delta = time() - lastRun

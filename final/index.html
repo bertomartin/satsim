@@ -21,11 +21,6 @@
           <div class='value'></div>
           <label>Time Acceleration</label>
         </div>
-        <div class='slider-box option' id='initialSpeed'>
-          <div class='slider'></div>
-          <div class='value'></div>
-          <label>Initial Speed</label>
-        </div>
       </div>
       <div class='btn-group' id='buttons'>
         <div class='btn active' id='play'><img src='img/play.png'/></div>
@@ -51,20 +46,52 @@
       <div id='flight_data'></div>
       <div id='orbit_data'></div>
     </div>
+    <div id='error'></div>
     <div id='right'>
       <div id='satellites'>
-        <h2>Satellites:</h2>
-        <table id='orbiters'>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>a</th>
-              <th>ecc</th>
-              <th>inc</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div id='list'>
+          <h2>Satellites:</h2>
+          <table id='orbiters'>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>a</th>
+                <th>ecc</th>
+                <th>inc</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id='add'>
+          <h2>New satellite:</h2>
+          <div class='slider-box option' id='semiMajorAxis'>
+            <label>Semi Major Axis</label>
+            <div class='slider'></div>
+            <div class='value'></div>
+          </div>
+          <div class='slider-box option' id='eccentricity'>
+            <label>Eccentricity</label>
+            <div class='slider'></div>
+            <div class='value'></div>
+          </div>
+          <div class='slider-box option' id='inclination'>
+            <label>Inclination</label>
+            <div class='slider'></div>
+            <div class='value'></div>
+          </div>
+          <div class='slider-box option' id='argumentOfPeriapsis'>
+            <label>Argument of Periapsis</label>
+            <div class='slider'></div>
+            <div class='value'></div>
+          </div>
+          <div class='slider-box option' id='longitudeOfTheAscendingNode'>
+            <label>Longitude of the Ascending Node</label>
+            <div class='slider'></div>
+            <div class='value'></div>
+          </div>
+          <button id='add-satellite'>Add satellite</button>
+        </div>
       </div>
       <div id='satellites-button'>Satellites</div>
     </div>

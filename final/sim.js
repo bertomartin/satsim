@@ -13,7 +13,7 @@
       thrust: false,
       speed: 0.1,
       gm: 398524.239,
-      update_data_interval: 3,
+      update_ui_interval: 10,
       timeAcceleration: 100,
       useKepler: true,
       earth_radius: 6371,
@@ -39,11 +39,8 @@
       this.planet = this.renderer.getPlanet();
       this.orbiters = [];
       this.last_ui_update = this.options.update_ui_interval;
-      this.addOrbiter(new window.Orbit(this.options.gm).fromOrbitalElements(6780, 0.001, 51 * Math.PI / 180, 0 * Math.PI / 180, 110 * Math.PI / 180));
-      this.addOrbiter(new window.Orbit(this.options.gm).fromOrbitalElements(20000, 0.65, 20 * Math.PI / 180, 0 * Math.PI / 180, 60 * Math.PI / 180));
-      this.addOrbiter(new window.Orbit(this.options.gm).fromOrbitalElements(8000, 0.1, -20 * Math.PI / 180, 0 * Math.PI / 180, 40 * Math.PI / 180));
-      this.addOrbiter(new window.Orbit(this.options.gm).fromOrbitalElements(8000, 0.1, -180 * Math.PI / 180, 0 * Math.PI / 180, 170 * Math.PI / 180));
-      this.addOrbiter(new window.Orbit(this.options.gm).fromOrbitalElements(6500, 0, -90 * Math.PI / 180, 0 * Math.PI / 180, 30 * Math.PI / 180));
+      this.selected = null;
+      this.addOrbiter(new window.Orbit(this.options.gm).fromOrbitalElements(6780, 0.001, 45 * Math.PI / 180, 0 * Math.PI / 180, 270 * Math.PI / 180));
       this.selectOrbiter(0);
       return this.updateUI(true);
     };
@@ -54,12 +51,13 @@
       orbiter.orbit = orbit;
       orbiter.id = this.orbiters.length;
       this.orbiters.push(orbiter);
-      return this.renderer.addOrbit(orbit);
+      this.renderer.addOrbit(orbit);
+      return this.updateUI(true);
     };
 
     Simulator.prototype.selectOrbiter = function(id, callback) {
       if (id < 0 || id >= this.orbiters.length) return;
-      if (!isNaN(this.selected)) {
+      if (this.selected !== null) {
         this.renderer.unselect(this.orbiters[this.selected]);
       }
       this.renderer.select(this.orbiters[id]);
@@ -75,22 +73,19 @@
     };
 
     Simulator.prototype.update = function(delta) {
-      var orbiter, _i, _len, _ref, _results;
+      var orbiter, _i, _len, _ref;
       _ref = this.orbiters;
-      _results = [];
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         orbiter = _ref[_i];
         orbiter.orbit.step(delta * 0.001 * this.options.timeAcceleration);
         orbiter.position = new THREE.Vector3(orbiter.orbit.position().x, orbiter.orbit.position().z, orbiter.orbit.position().y).divideScalar(63.71);
         orbiter.velocity = new THREE.Vector3(orbiter.orbit.v.x, orbiter.orbit.v.z, orbiter.orbit.v.y);
-        this.last_data_update -= 1;
-        if (this.last_data_update <= 0) {
-          _results.push(this.updateUI(false));
-        } else {
-          _results.push(void 0);
-        }
       }
-      return _results;
+      this.last_ui_update -= 1;
+      if (this.last_ui_update <= 0) {
+        this.updateUI(false);
+        return this.last_ui_update = this.options.update_ui_interval;
+      }
     };
 
     Simulator.prototype.run = function() {

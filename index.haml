@@ -21,10 +21,6 @@
           .slider
           .value
           %label Time Acceleration
-        .slider-box.option#initialSpeed
-          .slider
-          .value
-          %label Initial Speed
       #buttons.btn-group
         .btn#play.active <img src='img/play.png'/> 
         .btn#pause <img src='img/pause.png'/>
@@ -43,17 +39,44 @@
     #bottom
       #flight_data
       #orbit_data
+    #error
 
     #right
       #satellites
-        %h2 Satellites:
-        %table#orbiters
-          %thead
-            %tr
-              %th ID
-              %th a
-              %th ecc
-              %th inc
-          %tbody
+        #list
+          %h2 Satellites:
+          %table#orbiters
+            %thead
+              %tr
+                %th ID
+                %th a
+                %th ecc
+                %th inc
+            %tbody
+        #add
+          %h2 New satellite:
+          .slider-box.option#semiMajorAxis
+            %label Semi Major Axis
+            .slider
+            .value
+          .slider-box.option#eccentricity
+            %label Eccentricity
+            .slider
+            .value
+          .slider-box.option#inclination
+            %label Inclination
+            .slider
+            .value
+          .slider-box.option#argumentOfPeriapsis
+            %label Argument of Periapsis
+            .slider
+            .value
+          .slider-box.option#longitudeOfTheAscendingNode
+            %label Longitude of the Ascending Node
+            .slider
+            .value
+          %button#add-satellite Add satellite
+         
       #satellites-button Satellites
+
   #sim

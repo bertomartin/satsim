@@ -20,6 +20,7 @@
       var $container, light, sphereMaterial;
       this.el = el;
       this.options = default_options;
+      this.testOrbitVisible = false;
       $container = $(this.el);
       this.renderer = new THREE.WebGLRenderer();
       this.scene = new THREE.Scene();
@@ -80,7 +81,8 @@
       geometry = new THREE.Geometry();
       material = new THREE.LineBasicMaterial({
         color: 0xE01B32,
-        opacity: 1.0
+        opacity: 1.0,
+        linewidth: 2
       });
       for (i = 1, _ref = samples + 1; 1 <= _ref ? i <= _ref : i >= _ref; 1 <= _ref ? i++ : i--) {
         orbit.step(interval);
@@ -89,6 +91,41 @@
       }
       line = new THREE.Line(geometry, material);
       return this.scene.add(line);
+    };
+
+    Renderer3D.prototype.setTestOrbit = function(x, samples) {
+      var geometry, i, interval, material, orbit, pos, _ref;
+      if (samples == null) samples = 1000;
+      orbit = jQuery.extend(true, {}, x);
+      interval = orbit.period() / samples;
+      geometry = new THREE.Geometry();
+      material = new THREE.LineBasicMaterial({
+        color: 0xFCE235,
+        opacity: 1.0,
+        linewidth: 3
+      });
+      for (i = 1, _ref = samples + 1; 1 <= _ref ? i <= _ref : i >= _ref; 1 <= _ref ? i++ : i--) {
+        orbit.step(interval);
+        pos = new THREE.Vector3(orbit.position().x / 63.71, orbit.position().z / 63.71, orbit.position().y / 63.71);
+        geometry.vertices.push(pos);
+      }
+      if (this.testOrbit && this.testOrbitVisible) {
+        this.scene.remove(this.testOrbit);
+      }
+      this.testOrbit = new THREE.Line(geometry, material);
+      if (this.testOrbitVisible) return this.scene.add(this.testOrbit);
+    };
+
+    Renderer3D.prototype.showTestOrbit = function() {
+      if (this.testOrbitVisible) return;
+      this.testOrbitVisible = true;
+      return this.scene.add(this.testOrbit);
+    };
+
+    Renderer3D.prototype.hideTestOrbit = function() {
+      if (!this.testOrbitVisible) return;
+      this.testOrbitVisislbe = false;
+      return this.scene.remove(this.testOrbit);
     };
 
     Renderer3D.prototype.select = function(orbiter) {
