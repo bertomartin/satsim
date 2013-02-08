@@ -94,6 +94,7 @@ window.updateData = (orbiter) ->
   $("#orbit_data").html(html)
 
 updateUI = (orbiters, selected_id, update_table) ->
+  console.log "Updating UI"
   window.updateTable(orbiters, selected_id) if update_table
   window.updateData(orbiters[selected_id])
 
