@@ -1,17 +1,20 @@
 class @Renderer3D
+  default_options =
+    width: window.innerWidth
+    height: window.innerHeight
+    view_angle: 45
+    near: 0.1
+    far: 10000
+    mouse_x: 0
+    mouse_y: 0
+    clicked: false
+    selected_color: 0xFFB00F
+    default_color: 0xCC0000
+
   # Public API
   constructor: (el) ->
     @el = el
-    @options =
-      width: window.innerWidth
-      height: window.innerHeight
-      view_angle: 45
-      near: 0.1
-      far: 10000
-      mouse_x: 0
-      mouse_y: 0
-      clicked: false
-
+    @options = default_options
     $container = $(@el)
 
     @renderer = new THREE.WebGLRenderer()
@@ -26,7 +29,7 @@ class @Renderer3D
     )
     @camera.position.z = 300
     @scene.add @camera
-    
+
     @renderer.setSize(@options['width'], @options['height'])
 
     $container.append(@renderer.domElement)
@@ -50,11 +53,11 @@ class @Renderer3D
   createOrbiter: () ->
     orbiter = new THREE.Mesh(
       new THREE.SphereGeometry(2, 16, 16),
-      new THREE.MeshLambertMaterial({ color: 0xCC0000 })
+      new THREE.MeshLambertMaterial({ color: @options.default_color })
     )
     @scene.add orbiter
     orbiter
-    
+
   render: () ->
     if @onboard_camera
       @camera.position = @orbiter.position
@@ -80,6 +83,8 @@ class @Renderer3D
     line = new THREE.Line(geometry, material)
     @scene.add(line)
 
+  select: (orbiter) -> orbiter.material.color.setHex(@options.selected_color)
+  unselect: (orbiter) -> orbiter.material.color.setHex(@options.default_color)
   handleResize: ->
     @options.width = window.innerWidth
     @options.height = window.innerHeight

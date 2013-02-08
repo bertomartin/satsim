@@ -6,6 +6,7 @@ $(document).ready ->
   $("#sim").mouseup (e) -> window.renderer.set('clicked', false); window.renderer.mouseMove(e)
 
   window.simulation = new Simulator(window.renderer)
+  window.simulation.set('ui_updater', updateUI) 
   window.simulation.start()
 
   displayOnButtonClick("#options-button", "#options", "#info")
@@ -35,6 +36,66 @@ $(document).ready ->
     setActiveButton("stop")
 
   initializeSliders()
+  initializeClickEvents()
+
+initializeClickEvents = () ->
+  $("tr.orbiter").click (e) ->
+    id = parseInt($(this).closest('tr').attr('id').replace(/orbiter/gi, ''))
+    window.simulation.selectOrbiter(id, initializeClickEvents)
+
+window.formatTime = (sec) ->
+  str = ""
+  if sec > 60 * 60
+    str += "#{Math.floor(sec/(60*60))}h"
+    sec = sec%(60*60)
+  if sec > 60
+    str += "#{Math.floor(sec/60)}m"
+    sec = sec%60
+  if sec > 0
+    str += "#{sec.toFixed(0)}s"
+  str
+
+window.updateTable = (orbiters, selected_id) ->
+  html = ""
+  for orbiter in orbiters
+    cl = "orbiter "
+    cl += "selected" if orbiter.id == selected_id
+    html += "<tr id='orbiter#{orbiter.id}' class='#{cl}'><td>#{orbiter.id}</td><td>#{orbiter.orbit.semiMajorAxis().toFixed(1)}</td><td>#{orbiter.orbit.eccentricity().toFixed(4)}</td><td>#{orbiter.orbit.inclination().toFixed(1)}</td></tr>"
+  $("#orbiters tbody").html(html)
+
+window.updateData = (orbiter) ->
+  orbit = orbiter.orbit
+  html = "<h2>State data:</h2><table>"
+  html += "<tr><td>Orbital Velocity:</td><td>#{(orbit.velocity().length() * 1000).toFixed(1)} m/s</td></tr>"
+  html += "<tr><td>Orbital Velocity (x):</td><td>#{(orbit.velocity().x * 1000).toFixed(1)} m/s</td></tr>"
+  html += "<tr><td>Orbital Velocity (y):</td><td>#{(orbit.velocity().y * 1000).toFixed(1)} m/s</td></tr>"
+  html += "<tr><td>Orbital Velocity (z):</td><td>#{(orbit.velocity().z * 1000).toFixed(1)} m/s</td></tr>"
+  html += "<tr><td>G * M:</td><td>#{orbit.gm} km^3 s^-2</td></tr>"
+  html += "<tr><td>Altitude:</td><td>#{(orbit.distance() - 6371).toFixed(1)} km</td></tr>"
+  html += "</table>"
+  $("#flight_data").html(html)
+
+  html = "<h2>Orbital elements:</h2><table>"
+  html += "<tr><td>Semi Major Axis:</td><td>#{orbit.semiMajorAxis().toFixed(1)} km</td></tr>"
+  html += "<tr><td>Eccentricity:</td><td>#{orbit.eccentricity().toFixed(4)}</td></tr>"
+  html += "<tr><td>Period:</td><td>#{formatTime orbit.period()}</td></tr>"
+  html += "<tr><td>Apoapsis:</td><td>#{(orbit.apoapsis() - window.simulation.get('earth_radius')).toFixed(1)} km</td></tr>"
+  html += "<tr><td>Periapsis:</td><td>#{(orbit.periapsis() - window.simulation.get('earth_radius')).toFixed(1)} km</td></tr>"
+  html += "<tr><td>Inclination:</td><td>#{orbit.inclination().toFixed(1)} deg</td></tr>"
+  html += "<tr><td>Time to apoapsis:</td><td>#{formatTime orbit.timeToApoapsis()}</td></tr>"
+  html += "<tr><td>Time to periapsis:</td><td>#{formatTime orbit.timeToPeriapsis()}</td></tr>"
+  html += "<tr><td>Mean Velocity:</td><td>#{orbit.meanVelocity().toFixed(1)} m/s</td></tr>"
+  html += "<tr><td>Longitude of the Ascending Node:</td><td>#{orbit.ascendingNodeLongitude().toFixed(1)} deg</td></tr>"
+  html += "<tr><td>Argument of periapsis:</td><td>#{orbit.argumentOfPeriapsis().toFixed(1)} deg</td></tr>"
+  html += "<tr><td>True Anomaly:</td><td>#{orbit.trueAnomaly().toFixed(1)}</td></tr>"
+  html += "<tr><td>Eccentric Anomaly:</td><td>#{orbit.eccentricAnomaly().toFixed(1)}</td></tr>"
+  html += "<tr><td>Mean Anomaly:</td><td>#{orbit.meanAnomaly().toFixed(1)}</td></tr>"
+  html += "</table>"
+  $("#orbit_data").html(html)
+
+updateUI = (orbiters, selected_id, update_table) ->
+  window.updateTable(orbiters, selected_id) if update_table
+  window.updateData(orbiters[selected_id])
 
 
 displayOnButtonClick = (button, div, hide) ->

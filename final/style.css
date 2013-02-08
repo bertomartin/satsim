@@ -42,6 +42,13 @@ a {
     #ui #right #satellites table {
       border-collapse: collapse;
       margin: 0 auto; }
+    #ui #right #satellites tr {
+      cursor: pointer; }
+      #ui #right #satellites tr.selected {
+        background: rgba(252, 195, 144, 0.7);
+        cursor: default; }
+      #ui #right #satellites tr:hover {
+        background: rgba(248, 255, 181, 0.7); }
     #ui #right #satellites td {
       text-align: center; }
     #ui #right #satellites h2 {

@@ -1,20 +1,25 @@
 (function() {
 
   this.Renderer3D = (function() {
+    var default_options;
+
+    default_options = {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      view_angle: 45,
+      near: 0.1,
+      far: 10000,
+      mouse_x: 0,
+      mouse_y: 0,
+      clicked: false,
+      selected_color: 0xFFB00F,
+      default_color: 0xCC0000
+    };
 
     function Renderer3D(el) {
       var $container, light, sphereMaterial;
       this.el = el;
-      this.options = {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        view_angle: 45,
-        near: 0.1,
-        far: 10000,
-        mouse_x: 0,
-        mouse_y: 0,
-        clicked: false
-      };
+      this.options = default_options;
       $container = $(this.el);
       this.renderer = new THREE.WebGLRenderer();
       this.scene = new THREE.Scene();
@@ -42,7 +47,7 @@
     Renderer3D.prototype.createOrbiter = function() {
       var orbiter;
       orbiter = new THREE.Mesh(new THREE.SphereGeometry(2, 16, 16), new THREE.MeshLambertMaterial({
-        color: 0xCC0000
+        color: this.options.default_color
       }));
       this.scene.add(orbiter);
       return orbiter;
@@ -84,6 +89,14 @@
       }
       line = new THREE.Line(geometry, material);
       return this.scene.add(line);
+    };
+
+    Renderer3D.prototype.select = function(orbiter) {
+      return orbiter.material.color.setHex(this.options.selected_color);
+    };
+
+    Renderer3D.prototype.unselect = function(orbiter) {
+      return orbiter.material.color.setHex(this.options.default_color);
     };
 
     Renderer3D.prototype.handleResize = function() {

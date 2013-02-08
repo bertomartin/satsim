@@ -57,6 +57,18 @@ a {
         margin: 0 auto;
       }
 
+      tr {
+        cursor: pointer;
+        &.selected {
+          background: rgba(252, 195, 144, 0.7);
+          cursor: default;
+        }
+
+        &:hover {
+          background: rgba(248, 255, 181, 0.7);
+        }
+      }
+
       td {
         text-align: center;
       }
