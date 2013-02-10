@@ -237,3 +237,11 @@ canvas {
         padding-left: 20px; }
         #controls .slider-group .slider-box .value.zero {
           color: red; }
+
+button#add-satellite {
+  display: block;
+  width: 200px;
+  margin: 10px auto;
+  height: 30px;
+  font-size: 18px;
+  line-height: 30px; }

@@ -240,7 +240,7 @@
   };
 
   updateTestOrbit = function(option, value) {
-    var a, e, i, o, omega;
+    var a, e, html, i, o, omega;
     window.renderer.showTestOrbit();
     $("#" + option + " > .value").html(value);
     a = getOrbitalElement("semiMajorAxis");
@@ -249,7 +249,13 @@
     omega = getOrbitalElement("longitudeOfTheAscendingNode");
     o = getOrbitalElement("argumentOfPeriapsis");
     window.testOrbit.fromOrbitalElements(a, e, i, o, omega);
-    return window.renderer.setTestOrbit(window.testOrbit);
+    window.renderer.setTestOrbit(window.testOrbit);
+    html = "<table id='test-orbit-data'>";
+    html += "<tr><td>Period:</td><td>" + (formatTime(window.testOrbit.period())) + "</td></tr>";
+    html += "<tr><td>Apoapsis:</td><td>" + ((window.testOrbit.apoapsis() - window.simulation.get('earth_radius')).toFixed(1)) + " km</td></tr>";
+    html += "<tr><td>Periapsis:</td><td>" + ((window.testOrbit.periapsis() - window.simulation.get('earth_radius')).toFixed(1)) + " km</td></tr>";
+    html += "</table>";
+    return $("#test-orbit-data").html(html);
   };
 
 }).call(this);
