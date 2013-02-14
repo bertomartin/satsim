@@ -44,7 +44,11 @@ a {
         width: 200px;
         margin: 5px auto; }
       #ui #right #satellites .slider-box label, #ui #right #satellites .slider-box .value {
+        display: block;
         text-align: center; }
+      #ui #right #satellites .slider-box .value {
+        width: 50px;
+        margin: 0 auto; }
     #ui #right #satellites table, #ui #right #satellites th, #ui #right #satellites td {
       border: 1px solid black; }
     #ui #right #satellites table {

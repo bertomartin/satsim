@@ -48,6 +48,10 @@ $(document).ready ->
       window.renderer.hideTestOrbit()
     else
       error("Periapsis is below sea level!")
+  
+  elements = ["semiMajorAxis", "eccentricity", "inclination", "argumentOfPeriapsis", "longitudeOfTheAscendingNode"]
+  for el in elements
+    $("##{el} > input.value").change -> updateTestOrbit(el, $("##{el} > input.value").val())
 
 error = (msg) ->
   $("#error").html(msg)
@@ -160,7 +164,7 @@ optionsSliderArguments = (option, min = 1, max = 5000, step = 1) ->
   slide: (event, ui) -> setOption(option, ui.value) 
 
 orbitSliderArguments = (option, min = 1, max = 5000, step = 1, val = 1) ->
-  $("##{option} > .value").html(val)
+  $("##{option} > .value").val(val)
   value: val
   min: min
   max: max
@@ -176,18 +180,21 @@ setOption = (option, value) ->
     $("##{option} > .value").removeClass('zero')
 
 getOrbitalElement = (name) ->
-  v = parseFloat($("##{name} > .value").html())
+  v = parseFloat($("##{name} > .value").val())
   v *= Math.PI/180 if $.inArray(name, ["inclination", "longitudeOfTheAscendingNode", "argumentOfPeriapsis"]) >= 0
   v
 
 updateTestOrbit = (option, value) ->
   window.renderer.showTestOrbit()
-  $("##{option} > .value").html(value)
+  $("##{option} > .value").val(value)
   a = getOrbitalElement("semiMajorAxis")
   e = getOrbitalElement("eccentricity")
   i = getOrbitalElement("inclination")
   omega = getOrbitalElement("longitudeOfTheAscendingNode")
   o = getOrbitalElement("argumentOfPeriapsis")
+
+  if e < 0 or e >= 1 or omega < 0 or o < 0 or omega > Math.PI*2 or o > Math.PI*2
+    error("Invalid orbit!")
 
   window.testOrbit.fromOrbitalElements(a, e, i, o, omega)
   window.renderer.setTestOrbit(window.testOrbit)

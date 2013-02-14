@@ -2,6 +2,7 @@
   var displayOnButtonClick, error, getOrbitalElement, initializeClickEvents, initializeSliders, optionsSliderArguments, orbitSliderArguments, setActiveButton, setOption, updateTestOrbit, updateUI;
 
   $(document).ready(function() {
+    var el, elements, _i, _len, _results;
     window.renderer = new Renderer3D("#sim");
     $(window).resize(function() {
       return window.renderer.handleResize();
@@ -53,7 +54,7 @@
     window.testOrbit = new window.Orbit(window.simulation.get('gm')).fromOrbitalElements(8000, 0.001, 0 * Math.PI / 180, 0 * Math.PI / 180, 0 * Math.PI / 180);
     window.renderer.setTestOrbit(window.testOrbit);
     initializeSliders();
-    return $("#add-satellite").click(function() {
+    $("#add-satellite").click(function() {
       if (!(window.testOrbit.periapsis() <= window.simulation.get('earth_radius'))) {
         window.simulation.addOrbiter(jQuery.extend(true, {}, window.testOrbit));
         return window.renderer.hideTestOrbit();
@@ -61,6 +62,15 @@
         return error("Periapsis is below sea level!");
       }
     });
+    elements = ["semiMajorAxis", "eccentricity", "inclination", "argumentOfPeriapsis", "longitudeOfTheAscendingNode"];
+    _results = [];
+    for (_i = 0, _len = elements.length; _i < _len; _i++) {
+      el = elements[_i];
+      _results.push($("#" + el + " > input.value").change(function() {
+        return updateTestOrbit(el, $("#" + el + " > input.value").val());
+      }));
+    }
+    return _results;
   });
 
   error = function(msg) {
@@ -208,7 +218,7 @@
     if (max == null) max = 5000;
     if (step == null) step = 1;
     if (val == null) val = 1;
-    $("#" + option + " > .value").html(val);
+    $("#" + option + " > .value").val(val);
     return {
       value: val,
       min: min,
@@ -232,7 +242,7 @@
 
   getOrbitalElement = function(name) {
     var v;
-    v = parseFloat($("#" + name + " > .value").html());
+    v = parseFloat($("#" + name + " > .value").val());
     if ($.inArray(name, ["inclination", "longitudeOfTheAscendingNode", "argumentOfPeriapsis"]) >= 0) {
       v *= Math.PI / 180;
     }
@@ -242,12 +252,15 @@
   updateTestOrbit = function(option, value) {
     var a, e, html, i, o, omega;
     window.renderer.showTestOrbit();
-    $("#" + option + " > .value").html(value);
+    $("#" + option + " > .value").val(value);
     a = getOrbitalElement("semiMajorAxis");
     e = getOrbitalElement("eccentricity");
     i = getOrbitalElement("inclination");
     omega = getOrbitalElement("longitudeOfTheAscendingNode");
     o = getOrbitalElement("argumentOfPeriapsis");
+    if (e < 0 || e >= 1 || omega < 0 || o < 0 || omega > Math.PI * 2 || o > Math.PI * 2) {
+      error("Invalid orbit!");
+    }
     window.testOrbit.fromOrbitalElements(a, e, i, o, omega);
     window.renderer.setTestOrbit(window.testOrbit);
     html = "<table id='test-orbit-data'>";

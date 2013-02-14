@@ -55,7 +55,13 @@ a {
         }
 
         label, .value{
+          display: block;
           text-align: center;
+        }
+
+        .value {
+          width: 50px;
+          margin: 0 auto;
         }
         margin-top: 10px;
       }
