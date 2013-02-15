@@ -1,3 +1,6 @@
+window.rad = (d) -> d * Math.PI/180
+window.deg = (r) -> r * 180/Math.PI
+
 $(document).ready ->
   window.renderer = new Renderer3D("#sim")
   $(window).resize -> window.renderer.handleResize()
@@ -53,6 +56,10 @@ $(document).ready ->
   for el in elements
     $("##{el} > input.value").change -> updateTestOrbit(el, $("##{el} > input.value").val())
 
+  $("#circulize-low").click -> window.simulation.circulizeLow()
+  $("#circulize-high").click -> window.simulation.circulizeHigh()
+  $("#cancel-maneuver").click -> window.simulation.cancelManeuver()
+
 error = (msg) ->
   $("#error").html(msg)
   $("#error").slideDown(1000)
@@ -105,7 +112,7 @@ window.updateData = (orbiter) ->
   html += "<tr><td>Apoapsis:</td><td>#{(orbit.apoapsis() - window.simulation.get('earth_radius')).toFixed(1)} km</td></tr>"
   html += "<tr><td>Periapsis:</td><td>#{(orbit.periapsis() - window.simulation.get('earth_radius')).toFixed(1)} km</td></tr>"
   html += "</table>"
-  $("#orbit_data").html(html)
+  $("#orbit-data").html(html)
 
   html = "<h2>Current flight data:</h2><table>"
   html += "<tr><td>Current Altitude:</td><td>#{(orbit.distance() - 6371).toFixed(1)} km (#{dA.toFixed(3)} d/dt)</td></tr>"
@@ -116,11 +123,30 @@ window.updateData = (orbiter) ->
   html += "<tr><td>Time to apoapsis:</td><td>#{formatTime orbit.timeToApoapsis()}</td></tr>"
   html += "<tr><td>Time to periapsis:</td><td>#{formatTime orbit.timeToPeriapsis()}</td></tr>"
   html += "</table>"
-  $("#flight_data").html(html)
+  $("#flight-data").html(html)
+
+
+
+window.updateManeuvers = (orbiter) ->
+  if orbiter.maneuver
+    html = ""
+    html += "<tr><td>Status:</td><td>#{orbiter.maneuver.status}</td></tr>"
+    html += "<tr><td>Delta-V:</td><td>#{orbiter.maneuver.dV}</td></tr>"
+    html += "<tr><td>Next pass in:</td><td>#{formatTime orbiter.orbit.timeTo(window.rad(orbiter.maneuver.at))}</tr>"
+    $("#maneuver-status > table").html(html)
+    unless $("#maneuver-status" ).is(":visible")
+      $("#select-maneuver").hide() 
+      $("#maneuver-status").show() 
+  else
+    if $("#maneuver-status" ).is(":visible")
+      $("#select-maneuver").show() 
+      $("#maneuver-status").hide()
 
 updateUI = (orbiters, selected_id, update_table) ->
   window.updateTable(orbiters, selected_id) if update_table
   window.updateData(orbiters[selected_id]) unless selected_id == null
+  window.updateManeuvers(orbiters[selected_id]) unless selected_id == null
+
   initializeClickEvents()
 
 

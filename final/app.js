@@ -1,8 +1,16 @@
 (function() {
   var displayOnButtonClick, error, getOrbitalElement, initializeClickEvents, initializeSliders, optionsSliderArguments, orbitSliderArguments, setActiveButton, setOption, updateTestOrbit, updateUI;
 
+  window.rad = function(d) {
+    return d * Math.PI / 180;
+  };
+
+  window.deg = function(r) {
+    return r * 180 / Math.PI;
+  };
+
   $(document).ready(function() {
-    var el, elements, _i, _len, _results;
+    var el, elements, _i, _len;
     window.renderer = new Renderer3D("#sim");
     $(window).resize(function() {
       return window.renderer.handleResize();
@@ -63,14 +71,21 @@
       }
     });
     elements = ["semiMajorAxis", "eccentricity", "inclination", "argumentOfPeriapsis", "longitudeOfTheAscendingNode"];
-    _results = [];
     for (_i = 0, _len = elements.length; _i < _len; _i++) {
       el = elements[_i];
-      _results.push($("#" + el + " > input.value").change(function() {
+      $("#" + el + " > input.value").change(function() {
         return updateTestOrbit(el, $("#" + el + " > input.value").val());
-      }));
+      });
     }
-    return _results;
+    $("#circulize-low").click(function() {
+      return window.simulation.circulizeLow();
+    });
+    $("#circulize-high").click(function() {
+      return window.simulation.circulizeHigh();
+    });
+    return $("#cancel-maneuver").click(function() {
+      return window.simulation.cancelManeuver();
+    });
   });
 
   error = function(msg) {
@@ -136,7 +151,7 @@
     html += "<tr><td>Apoapsis:</td><td>" + ((orbit.apoapsis() - window.simulation.get('earth_radius')).toFixed(1)) + " km</td></tr>";
     html += "<tr><td>Periapsis:</td><td>" + ((orbit.periapsis() - window.simulation.get('earth_radius')).toFixed(1)) + " km</td></tr>";
     html += "</table>";
-    $("#orbit_data").html(html);
+    $("#orbit-data").html(html);
     html = "<h2>Current flight data:</h2><table>";
     html += "<tr><td>Current Altitude:</td><td>" + ((orbit.distance() - 6371).toFixed(1)) + " km (" + (dA.toFixed(3)) + " d/dt)</td></tr>";
     html += "<tr><td>Current Speed:</td><td>" + (orbit.velocity().length().toFixed(2)) + " km/s (" + (dV.toFixed(3)) + " d/dt)</td></tr>";
@@ -146,12 +161,33 @@
     html += "<tr><td>Time to apoapsis:</td><td>" + (formatTime(orbit.timeToApoapsis())) + "</td></tr>";
     html += "<tr><td>Time to periapsis:</td><td>" + (formatTime(orbit.timeToPeriapsis())) + "</td></tr>";
     html += "</table>";
-    return $("#flight_data").html(html);
+    return $("#flight-data").html(html);
+  };
+
+  window.updateManeuvers = function(orbiter) {
+    var html;
+    if (orbiter.maneuver) {
+      html = "";
+      html += "<tr><td>Status:</td><td>" + orbiter.maneuver.status + "</td></tr>";
+      html += "<tr><td>Delta-V:</td><td>" + orbiter.maneuver.dV + "</td></tr>";
+      html += "<tr><td>Next pass in:</td><td>" + (formatTime(orbiter.orbit.timeTo(window.rad(orbiter.maneuver.at)))) + "</tr>";
+      $("#maneuver-status > table").html(html);
+      if (!$("#maneuver-status").is(":visible")) {
+        $("#select-maneuver").hide();
+        return $("#maneuver-status").show();
+      }
+    } else {
+      if ($("#maneuver-status").is(":visible")) {
+        $("#select-maneuver").show();
+        return $("#maneuver-status").hide();
+      }
+    }
   };
 
   updateUI = function(orbiters, selected_id, update_table) {
     if (update_table) window.updateTable(orbiters, selected_id);
     if (selected_id !== null) window.updateData(orbiters[selected_id]);
+    if (selected_id !== null) window.updateManeuvers(orbiters[selected_id]);
     return initializeClickEvents();
   };
 

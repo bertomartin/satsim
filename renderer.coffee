@@ -73,18 +73,25 @@ class @Renderer3D
 
     @renderer.render(@scene, @camera)
 
-  addOrbit: (x, samples = 10000) ->
+  addOrbit: (x, samples = 10000, color = 0xE01B32) ->
     orbit = jQuery.extend(true, {}, x) #Clone
     interval = orbit.period()/samples
 
     geometry = new THREE.Geometry()
-    material = new THREE.LineBasicMaterial({ color: 0xE01B32, opacity: 1.0, linewidth: 2})
+    material = new THREE.LineBasicMaterial({ color: color, opacity: 1.0, linewidth: 2})
     for i in [1..samples+1]
       orbit.step(interval)
       pos = new THREE.Vector3(orbit.position().x/63.71, orbit.position().z/63.71, orbit.position().y/63.71)
       geometry.vertices.push(pos)
     line = new THREE.Line(geometry, material)
     @scene.add(line)
+    line
+
+  removeOrbiter: (object) ->
+    @scene.remove(object)
+
+  removeOrbit: (line) ->
+    @scene.remove(line)
 
   setTestOrbit: (x, samples = 1000) ->
     orbit = jQuery.extend(true, {}, x) #Clone

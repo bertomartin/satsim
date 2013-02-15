@@ -14,6 +14,9 @@ class @Orbit
     @i = i
     @o = o
     @omega = omega
+    @calculateOrbit()
+
+  calculateOrbit: ->
     @ea = 0
     @n = 0
     @m = 0
@@ -86,11 +89,22 @@ class @Orbit
   trueAnomaly: -> @nu * 180/Math.PI
   eccentricAnomaly: -> @ea * 180/Math.PI
   meanAnomaly: -> @m * 180/Math.PI
+  futureMeanAnomaly: (dt) -> 
+    m = @m + dt * Math.sqrt(@gm/Math.pow(@a, 3))
+    m -= 2 * Math.PI if m > 2 * Math.PI
+    m * 180/Math.PI
+
 
   periapsis: -> @a*(1-@e.length())
   apoapsis: -> @a*(1+@e.length())
-  timeToApoapsis: -> 
-    v = (Math.PI - @m) * Math.sqrt(Math.pow(@a, 3)/@gm)
-    v += @period() if v < 0
-    v
-  timeToPeriapsis: -> (2*Math.PI - @m) * Math.sqrt(Math.pow(@a, 3)/@gm)
+  timeToApoapsis: -> @timeTo(Math.PI)
+  timeToPeriapsis: -> @timeTo(0)
+  timeTo: (m) ->
+    if m < @m
+      d = (2*Math.PI - @m) + m 
+    else
+      d = m - @m
+    d * Math.sqrt(Math.pow(@a, 3)/@gm)
+
+  maxSpeed: -> Math.sqrt((1+@e.length())*@gm/((1-@e.length()) * @a))
+  minSpeed: -> Math.sqrt((1-@e.length())*@gm/((1+@e.length()) * @a))

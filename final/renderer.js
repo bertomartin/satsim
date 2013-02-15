@@ -73,14 +73,15 @@
       return this.renderer.render(this.scene, this.camera);
     };
 
-    Renderer3D.prototype.addOrbit = function(x, samples) {
+    Renderer3D.prototype.addOrbit = function(x, samples, color) {
       var geometry, i, interval, line, material, orbit, pos, _ref;
       if (samples == null) samples = 10000;
+      if (color == null) color = 0xE01B32;
       orbit = jQuery.extend(true, {}, x);
       interval = orbit.period() / samples;
       geometry = new THREE.Geometry();
       material = new THREE.LineBasicMaterial({
-        color: 0xE01B32,
+        color: color,
         opacity: 1.0,
         linewidth: 2
       });
@@ -90,7 +91,16 @@
         geometry.vertices.push(pos);
       }
       line = new THREE.Line(geometry, material);
-      return this.scene.add(line);
+      this.scene.add(line);
+      return line;
+    };
+
+    Renderer3D.prototype.removeOrbiter = function(object) {
+      return this.scene.remove(object);
+    };
+
+    Renderer3D.prototype.removeOrbit = function(line) {
+      return this.scene.remove(line);
     };
 
     Renderer3D.prototype.setTestOrbit = function(x, samples) {

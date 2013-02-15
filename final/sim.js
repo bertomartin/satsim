@@ -2,7 +2,7 @@
   var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   this.Simulator = (function() {
-    var default_options, lastRun, loopInterval, randomUpTo, time;
+    var default_options, inBetween, lastRun, loopInterval, randomUpTo, time;
 
     loopInterval = 20;
 
@@ -49,10 +49,52 @@
       var orbiter;
       orbiter = this.renderer.createOrbiter();
       orbiter.orbit = orbit;
+      orbiter.maneuver = null;
       orbiter.id = this.orbiters.length;
+      orbiter.line = this.renderer.addOrbit(orbit);
       this.orbiters.push(orbiter);
-      this.renderer.addOrbit(orbit);
       return this.updateUI(true);
+    };
+
+    Simulator.prototype.circulizeHigh = function() {
+      var newOrbit, oldOrbit;
+      oldOrbit = this.orbiters[this.selected].orbit;
+      newOrbit = jQuery.extend(true, {}, oldOrbit);
+      newOrbit.a = oldOrbit.apoapsis();
+      newOrbit.e = new THREE.Vector3();
+      newOrbit.calculateOrbit();
+      newOrbit.m = Math.PI;
+      return this.orbiters[this.selected].maneuver = {
+        status: "planned",
+        at: 180,
+        dV: newOrbit.maxSpeed() - oldOrbit.minSpeed(),
+        orbit: newOrbit,
+        line: this.renderer.addOrbit(newOrbit, 1000, 0x3587DE)
+      };
+    };
+
+    Simulator.prototype.circulizeLow = function() {
+      var newOrbit, oldOrbit;
+      oldOrbit = this.orbiters[this.selected].orbit;
+      newOrbit = jQuery.extend(true, {}, oldOrbit);
+      newOrbit.a = oldOrbit.periapsis();
+      newOrbit.e = new THREE.Vector3();
+      newOrbit.calculateOrbit();
+      return this.orbiters[this.selected].maneuver = {
+        status: "planned",
+        at: 0,
+        dV: newOrbit.maxSpeed() - oldOrbit.maxSpeed(),
+        orbit: newOrbit,
+        line: this.renderer.addOrbit(newOrbit, 1000, 0x3587DE)
+      };
+    };
+
+    Simulator.prototype.cancelManeuver = function() {
+      if (!this.orbiters[this.selected].maneuver) return;
+      if (this.orbiters[this.selected].maneuver.status !== "completed") {
+        this.renderer.removeOrbit(this.orbiters[this.selected].maneuver.line);
+      }
+      return this.orbiters[this.selected].maneuver = null;
     };
 
     Simulator.prototype.selectOrbiter = function(id, callback) {
@@ -72,11 +114,28 @@
       }
     };
 
+    inBetween = function(x, lo, hi) {
+      if (lo > hi) {
+        return inBetween(x, lo, 360) || inBetween(x, 0, hi);
+      } else {
+        return x >= lo && x <= hi;
+      }
+    };
+
     Simulator.prototype.update = function(delta) {
       var orbiter, _i, _len, _ref;
       _ref = this.orbiters;
       for (_i = 0, _len = _ref.length; _i < _len; _i++) {
         orbiter = _ref[_i];
+        if (orbiter.maneuver && orbiter.maneuver.status === "planned") {
+          if (inBetween(orbiter.maneuver.at, orbiter.orbit.meanAnomaly(), orbiter.orbit.futureMeanAnomaly(delta * 0.001 * this.options.timeAcceleration))) {
+            orbiter.orbit = orbiter.maneuver.orbit;
+            orbiter.maneuver.status = "completed";
+            this.renderer.removeOrbit(orbiter.maneuver.line);
+            this.renderer.removeOrbit(orbiter.line);
+            orbiter.line = this.renderer.addOrbit(orbiter.orbit);
+          }
+        }
         orbiter.orbit.step(delta * 0.001 * this.options.timeAcceleration);
         orbiter.position = new THREE.Vector3(orbiter.orbit.position().x, orbiter.orbit.position().z, orbiter.orbit.position().y).divideScalar(63.71);
         orbiter.velocity = new THREE.Vector3(orbiter.orbit.v.x, orbiter.orbit.v.z, orbiter.orbit.v.y);
@@ -92,7 +151,7 @@
       var delta;
       delta = time() - lastRun;
       lastRun = time();
-      this.update(delta);
+      if (this.status === "running") this.update(delta);
       return this.renderer.render(delta);
     };
 
@@ -110,12 +169,18 @@
     };
 
     Simulator.prototype.pause = function() {
-      window.clearInterval(this.intervalHandle);
       return this.status = "paused";
     };
 
     Simulator.prototype.stop = function() {
-      window.clearInterval(this.intervalHandle);
+      var orbiter, _i, _len, _ref;
+      _ref = this.orbiters;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        orbiter = _ref[_i];
+        this.renderer.removeOrbiter(orbiter);
+        this.renderer.removeOrbit(orbiter.line);
+        if (orbiter.maneuver) this.renderer.removeOrbit(orbiter.maneuver.line);
+      }
       return this.status = "stopped";
     };
 

@@ -35,10 +35,33 @@ class @Simulator
   addOrbiter: (orbit) ->
     orbiter = @renderer.createOrbiter()
     orbiter.orbit = orbit
+    orbiter.maneuver = null
     orbiter.id = @orbiters.length
+    orbiter.line = @renderer.addOrbit(orbit)
     @orbiters.push orbiter
-    @renderer.addOrbit(orbit)
     @updateUI(true)
+
+  circulizeHigh: () ->
+    oldOrbit = @orbiters[@selected].orbit
+    newOrbit = jQuery.extend(true, {}, oldOrbit)
+    newOrbit.a = oldOrbit.apoapsis()
+    newOrbit.e = new THREE.Vector3()
+    newOrbit.calculateOrbit()
+    newOrbit.m = Math.PI
+    @orbiters[@selected].maneuver = {status: "planned", at: 180, dV: newOrbit.maxSpeed() - oldOrbit.minSpeed(), orbit: newOrbit, line: @renderer.addOrbit(newOrbit, 1000, 0x3587DE)}
+
+  circulizeLow: () ->
+    oldOrbit = @orbiters[@selected].orbit
+    newOrbit = jQuery.extend(true, {}, oldOrbit)
+    newOrbit.a = oldOrbit.periapsis()
+    newOrbit.e = new THREE.Vector3()
+    newOrbit.calculateOrbit()
+    @orbiters[@selected].maneuver = {status: "planned", at: 0, dV: newOrbit.maxSpeed() - oldOrbit.maxSpeed(), orbit: newOrbit, line: @renderer.addOrbit(newOrbit, 1000, 0x3587DE)}
+
+  cancelManeuver: () ->
+    return unless @orbiters[@selected].maneuver
+    @renderer.removeOrbit(@orbiters[@selected].maneuver.line) unless @orbiters[@selected].maneuver.status == "completed"
+    @orbiters[@selected].maneuver = null
 
   selectOrbiter: (id, callback) ->
     return if id < 0 or id >= @orbiters.length
@@ -52,9 +75,24 @@ class @Simulator
   updateUI: (update_table)->
     @options.ui_updater(@orbiters, @selected, update_table) if typeof(@options.ui_updater) == "function"
 
+  inBetween = (x, lo, hi) ->
+    if lo > hi
+      return (inBetween(x, lo, 360) or inBetween(x, 0, hi))
+    else
+      return (x >= lo and x <= hi)
+
   update: (delta) ->
     for orbiter in @orbiters
+      if orbiter.maneuver and orbiter.maneuver.status == "planned"
+        if inBetween(orbiter.maneuver.at, orbiter.orbit.meanAnomaly(), orbiter.orbit.futureMeanAnomaly(delta * 0.001 * @options.timeAcceleration))
+          orbiter.orbit = orbiter.maneuver.orbit
+          orbiter.maneuver.status = "completed"
+          @renderer.removeOrbit(orbiter.maneuver.line)
+          @renderer.removeOrbit(orbiter.line)
+          orbiter.line = @renderer.addOrbit(orbiter.orbit)
+
       orbiter.orbit.step(delta * 0.001 * @options.timeAcceleration)
+
       orbiter.position = new THREE.Vector3(orbiter.orbit.position().x, orbiter.orbit.position().z, orbiter.orbit.position().y).divideScalar(63.71)
       orbiter.velocity = new THREE.Vector3(orbiter.orbit.v.x, orbiter.orbit.v.z, orbiter.orbit.v.y)
 
@@ -67,7 +105,7 @@ class @Simulator
     delta = time() - lastRun
     lastRun = time()
 
-    @update(delta)
+    @update(delta) if @status == "running"
     @renderer.render(delta)
   
   # Public API
@@ -84,11 +122,13 @@ class @Simulator
     @status = "running"
 
   pause: ->
-    window.clearInterval(@intervalHandle)
     @status = "paused"
 
   stop: ->
-    window.clearInterval(@intervalHandle)
+    for orbiter in @orbiters
+      @renderer.removeOrbiter(orbiter)
+      @renderer.removeOrbit(orbiter.line)
+      @renderer.removeOrbit(orbiter.maneuver.line) if orbiter.maneuver
     @status = "stopped"
 
   get: (option) -> @options[option]

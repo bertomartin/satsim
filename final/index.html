@@ -43,8 +43,20 @@
       </header>
     </div>
     <div id='bottom'>
-      <div id='flight_data'></div>
-      <div id='orbit_data'></div>
+      <div id='flight-data'></div>
+      <div id='orbit-data'></div>
+      <div id='maneuvers'>
+        <div id='select-maneuver'>
+          <h2>Maneuvers:</h2>
+          <button class='maneuver' id='circulize-low'>Circulize at Periapsis</button>
+          <button class='maneuver' id='circulize-high'>Circulize at Apoapsis</button>
+        </div>
+        <div id='maneuver-status'>
+          <h2>Planned orbital maneuver:</h2>
+          <table></table>
+          <button id='cancel-maneuver'>Cancel</button>
+        </div>
+      </div>
     </div>
     <div id='error'></div>
     <div id='right'>

@@ -22,6 +22,10 @@
       this.i = i;
       this.o = o;
       this.omega = omega;
+      return this.calculateOrbit();
+    };
+
+    Orbit.prototype.calculateOrbit = function() {
       this.ea = 0;
       this.n = 0;
       this.m = 0;
@@ -138,6 +142,13 @@
       return this.m * 180 / Math.PI;
     };
 
+    Orbit.prototype.futureMeanAnomaly = function(dt) {
+      var m;
+      m = this.m + dt * Math.sqrt(this.gm / Math.pow(this.a, 3));
+      if (m > 2 * Math.PI) m -= 2 * Math.PI;
+      return m * 180 / Math.PI;
+    };
+
     Orbit.prototype.periapsis = function() {
       return this.a * (1 - this.e.length());
     };
@@ -147,14 +158,29 @@
     };
 
     Orbit.prototype.timeToApoapsis = function() {
-      var v;
-      v = (Math.PI - this.m) * Math.sqrt(Math.pow(this.a, 3) / this.gm);
-      if (v < 0) v += this.period();
-      return v;
+      return this.timeTo(Math.PI);
     };
 
     Orbit.prototype.timeToPeriapsis = function() {
-      return (2 * Math.PI - this.m) * Math.sqrt(Math.pow(this.a, 3) / this.gm);
+      return this.timeTo(0);
+    };
+
+    Orbit.prototype.timeTo = function(m) {
+      var d;
+      if (m < this.m) {
+        d = (2 * Math.PI - this.m) + m;
+      } else {
+        d = m - this.m;
+      }
+      return d * Math.sqrt(Math.pow(this.a, 3) / this.gm);
+    };
+
+    Orbit.prototype.maxSpeed = function() {
+      return Math.sqrt((1 + this.e.length()) * this.gm / ((1 - this.e.length()) * this.a));
+    };
+
+    Orbit.prototype.minSpeed = function() {
+      return Math.sqrt((1 - this.e.length()) * this.gm / ((1 + this.e.length()) * this.a));
     };
 
     return Orbit;

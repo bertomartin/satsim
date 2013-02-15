@@ -37,8 +37,19 @@
         %p#desc HTML5 Satellite Simulator 
         %p#instruction Click for more info
     #bottom
-      #flight_data
-      #orbit_data
+      #flight-data
+      #orbit-data
+      #maneuvers
+        #select-maneuver
+          %h2 Maneuvers:
+          %button.maneuver#circulize-low Circulize at Periapsis
+          %button.maneuver#circulize-high Circulize at Apoapsis
+        #maneuver-status
+          %h2 Planned orbital maneuver:
+          %table
+          %button#cancel-maneuver Cancel
+
+
     #error
 
     #right
